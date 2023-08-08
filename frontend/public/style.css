@@ -1,0 +1,282 @@
+/**
+* ! DEFAULT STYLES OF BROWSER
+**/
+
+* {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    padding: 20px;
+}
+
+ul {
+    list-style: none;
+    color: black;
+    margin: 0;
+}
+
+li {
+    list-style: none;
+    color: black;
+    margin: 0;
+}
+
+a {
+    color: black;
+    text-decoration: none;
+}
+
+a:hover {
+    color: darkgreen;
+}
+
+h2 {
+    margin-bottom: 10px;
+}
+
+h5 {
+    color: darkred;
+}
+
+button {
+    background-color: white;
+    color: black;
+    border: 1px solid darkgrey;
+    border-radius: 3px;
+    transition-duration: 0.4s;
+    margin: 2px;
+    padding: 2px;
+}
+
+button:hover {
+    background-color: darkolivegreen;
+    color: white;
+}
+
+/**
+* ! NAVBAR STYLES
+**/
+
+.main-header {
+    padding: 25px 60px;
+    display: flex;
+    flex-direction: row;
+    background-color: #C2C5AA;
+    color: #333D29;
+    border-radius: 4px;
+}
+
+.searchInput {
+    border-radius: 4px;
+}
+
+.search-btn {
+    border-radius: 4px;
+    margin-left: 5px;
+    width: 40px;
+}
+
+/** 
+* ! PRODUCT STYLES
+**/
+
+.shop {
+    display: grid;
+    grid-template-columns: 75% 25%;
+}
+
+.productContainer {
+    margin: 20px;
+    padding: 20px;
+    border: solid grey 1px;
+    border-radius: 3px;
+    max-width: fit-content;
+}
+
+#shopItems {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    float: left;
+}
+
+.cartItemContainer {
+    margin: 20px 20px;
+    padding: 20px 20px;
+}
+
+
+/** 
+* ! CART STYLES
+**/
+
+#cart {
+    display: flex;
+    flex-direction: column;
+    float: right;
+    margin: auto;
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #C2C5AA;
+    border: 1px solid lightgray;
+    border-radius: 3px;
+}
+
+#cartItems {
+    display: block;
+    margin: 20px 20px;
+    padding: 20px 20px;
+    max-width: 90%;
+    min-width: 50%;
+}
+
+.cartItemContainer {
+    display: block;
+    margin: auto;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    border: 1px solid grey;
+    background-color: white;
+    border-radius: 3px;
+    max-width: 90%;
+    min-width: 90%;
+    min-height: 60px;
+}
+
+.cartItemDeleteButton {
+    flex: auto;
+    flex-direction: row;
+}
+
+.cartItemDecreaseButton {
+    flex: auto;
+    flex-direction: row;
+}
+
+.cartItemIncreaseButton {
+    flex: auto;
+    flex-direction: row;
+}
+
+#deleteCartItemsbtn {
+    width: 75px;
+    margin: auto;
+    margin-bottom: 10px;
+}
+
+#placeOrderbtn {
+    width: 75px;
+    margin: auto;
+    margin-bottom: 10px;
+}
+
+#cartSum {
+    margin: auto;
+    margin-bottom: 20px;
+    width: 75%;
+    text-align: center;
+}
+
+.checkoutContainer {
+    display: flex;
+    flex-direction: column;
+}
+
+#showCheckoutItems {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+
+/**
+* ! GENERAL FORM STYLES
+**/
+
+form {
+    margin: auto;
+    display: block;
+    position: center;
+}
+
+/**
+* ! SIGN UP FORM STYLES
+**/
+
+#signUp {
+    display: block;
+    position: center;
+}
+
+#username {
+    border-radius: 4px;
+}
+
+#password {
+    border-radius: 4px;
+}
+
+#createUser {
+    border-radius: 4px;
+}
+
+/**
+* ! LOG IN FORM STYLES
+**/
+
+#login {
+    display: block;
+    margin: auto;
+    position: center;
+}
+
+.container {
+    display: block;
+    max-width: 45%;
+    padding: 10px;
+    margin: auto;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    border: 1px solid darkgrey;
+    border-radius: 3px;
+}
+
+/**
+* ! CHECKOUT FORM STYLES
+**/
+
+#showCheckoutItems {
+    display: block;
+    max-width: 45%;
+    padding: 10px;
+    margin: auto;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    border: 1px solid darkgrey;
+    border-radius: 3px;
+}
+
+/**
+* ! ORDER CONFIRMATION FORM STYLES
+**/
+
+#showOrder {
+    display: block;
+    max-width: 45%;
+    padding: 10px;
+    margin: auto;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    border-radius: 3px;
+}
+
+#showOrderItemsSum {
+    display: block;
+    max-width: 45%;
+    padding: 10px;
+    margin: auto;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}

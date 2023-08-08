@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <title>Verkkokauppa - tilauksen yhteenveto</title>
+</head>
+
+<body onload="showCheckOutItems()">
+    <header class="main-header">
+        <nav class="main-nav">
+            <h2>Verkkokauppa</h2>
+
+            <ul class="links-container">
+                <li class="link-item"><a href="./index.html" class="link">Takaisin etusivulle</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div id="showCheckoutItems">
+        <br>
+        <h3>Tämä on tilauksen yhteenvetosivu</h3>
+        <br>
+    </div>
+
+    <div id="showCheckoutItemsSum">
+    </div>
+
+    <form id="ordererInfo">
+        <div class="container">
+            <br>
+            <h4>Syötä tilaajan tiedot</h4>
+            <input type="text" name="orderer_firstName" id="orderer_firstName" placeholder="etunimi" required></input>
+            <input type="text" name="orderer_lastName" id="orderer_lastName" placeholder="sukunimi" required></input>
+            <br><br>
+            <button id="sendCheckoutItemsbtn">Tee tilaus</button>
+        </div>
+    </form>
+
+    <script>
+
+        function showCheckOutItems() {
+            let checkoutDiv = document.getElementById("showCheckoutItems");
+            let total = 0;
+
+            const checkoutItems = JSON.parse(localStorage.getItem("cart"));
+            console.log("Tässä on koko tilauksen sisältö: ", checkoutItems);
+
+            checkoutItems.forEach(productInfo => {
+                console.log("Tässä ovat tilauksen tuotekohtaiset tiedot: ", productInfo);
+
+                let checkoutItemContainer = document.createElement('div');
+                checkoutItemContainer.className = 'checkoutContainer';
+
+                let checkoutItemName = document.createElement('h4');
+                checkoutItemName.className = 'checkoutName';
+                checkoutItemName.innerHTML = productInfo.productInfo.product_name;
+
+                let checkoutItemDescription = document.createElement('p');
+                checkoutItemDescription.className = 'checkoutItemDescription';
+                checkoutItemDescription.innerHTML = productInfo.productInfo.product_description;
+
+                let checkoutItemPrice = document.createElement('h5');
+                checkoutItemPrice.className = 'checkoutItemPrice';
+                checkoutItemPrice.innerHTML = "yksikköhinta: " + productInfo.productInfo.product_price + " €";
+
+                let checkoutItemNumber = document.createElement('p');
+                checkoutItemNumber.className = 'checkoutItemNumber';
+                checkoutItemNumber.innerHTML = productInfo.productsInCart + " kpl";
+
+                let checkoutItemsDiv = document.getElementById("showCheckoutItemsSum");
+                checkoutItemsDiv.textContent = '';
+
+                total += productInfo.productInfo.product_price * productInfo.productsInCart;
+
+                checkoutItemContainer.appendChild(checkoutItemName);
+                checkoutItemContainer.appendChild(checkoutItemDescription);
+                checkoutItemContainer.appendChild(checkoutItemPrice);
+                checkoutItemContainer.appendChild(checkoutItemNumber);
+
+                checkoutDiv.appendChild(checkoutItemContainer);
+            });
+
+            let checkoutItemsSum = document.createElement('p');
+            checkoutItemsSum.className = 'checkoutItemsSum';
+            checkoutItemsSum.innerHTML = "yhteensä: " + total + " €";
+
+            checkoutDiv.appendChild(checkoutItemsSum);
+        };
+
+        document.getElementById("ordererInfo").addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const formElement = document.getElementById("ordererInfo");
+            const formData = new FormData(formElement);
+            const data = {};
+
+            formData.forEach((value, key) => data[key] = value);
+            const dataAsJson = JSON.stringify(data);
+
+            console.log('Tämä on JSON:iksi muunnettu formData (orderer information): ', dataAsJson);
+
+            const checkoutBackendItems = localStorage.getItem("cart");
+
+            console.log("Tämä on JSON:iksi muunnettu checkout-items data: ", checkoutBackendItems);
+
+            const backendOrder = {
+                orderItems: checkoutBackendItems,
+                orderer: dataAsJson
+            };
+
+            console.log('Tilaus: ', JSON.stringify(backendOrder));
+
+            const response = await fetch('http://localhost:3000/api/orders/', {
+                method: 'POST',
+                body: JSON.stringify(backendOrder),
+                mode: "cors",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            })
+
+                // promise method "then". Promise method .then is not suitable in this exact situation
+                // (used after await fetch methods) but code is still working properly so I will not 
+                // alter the code in this case.
+                .then((response) => {
+
+                    if (response.status === 201) {
+                        window.location.href = 'orderConfirmation.html';
+                    }
+
+                    console.log('Tämä on vastaus localhost:3000/checkout-URL:sta: ', response);
+                    return response.json();
+                })
+
+                // promise method "then"
+                .then((data) => {
+                    console.log('Tämä on stringiksi muunnettu data localhost:3000/checkout-URL:sta: ', data);
+                })
+
+                // error handling with "catch" method
+                .catch((error) => {
+                    console.error('Error', error);
+                    // res.status(500).json({ msg: error });
+                })
+        });
+
+    </script>
+
+</body>
+
+</html>

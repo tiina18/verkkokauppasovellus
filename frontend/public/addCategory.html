@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <title>Verkkokauppa - Kategorioiden lisääminen</title>
+</head>
+
+<body>
+    <header class="main-header">
+        <nav class="main-nav">
+            <h2>Verkkokauppa</h2>
+
+            <ul class="links-container">
+                <li class="link-item"><a href="./index.html" class="link">Takaisin etusivulle</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <form id="addCategory">
+        <div class="container">
+            <h3>Lisää uusi kategoria</h3>
+            <input type="text" name="category_name" id="categoryName" placeholder="Kategorianimi" required></input>
+            <input type="text" name="category_description" id="categoryDescription" placeholder="Kategoriakuvaus"
+                required></input>
+            <br><br><button type="submit" id="createProduct">Lisää kategoria</button>
+        </div>
+    </form>
+    <script>
+
+        // fetching an HTML element "addProduct". Adding an event listener in a submit action.
+        // When the HTML form is submitted the asyncronic function will fetch the formData from the HTML form
+        document.getElementById("addCategory").addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            // formElement is defined as a fetched document id "addProduct"
+            const formElement = document.getElementById("addCategory");
+            // formData is defined as a new FormData formElement
+            // converting formData to string
+            const formData = new FormData(formElement);
+
+            const data = {};
+            formData.forEach((value, key) => data[key] = value);
+            const dataAsJson = JSON.stringify(data);
+
+            console.log('Tämä on JSON:iksi muunnettu formData: ', dataAsJson);
+
+            // fetching formData with POST method from localhost/addProduct URL
+            const response = await fetch('http://localhost:3000/api/categories/', {
+                method: 'POST',
+                body: dataAsJson,
+                mode: "cors",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            })
+
+                // promise method "then"
+                .then((response) => {
+                    console.log('Tämä on vastaus localhost:3000/addProduct-URL:sta: ', response);
+                    return response.json();
+                })
+                .then((data) => {
+                    console.log('Tämä on stringiksi muunnettu data localhost:3000/addProduct-URL:sta: ', data);
+                })
+                // error handling with "catch" method
+                .catch((error) => {
+                    console.error('Error', error);
+                })
+        });
+
+    </script>
+</body>
+
+</html>

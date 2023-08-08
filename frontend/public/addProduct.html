@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <title>Verkkokauppa - tuotteiden lisääminen</title>
+</head>
+
+<body>
+    <header class="main-header">
+        <nav class="main-nav">
+            <h2>Verkkokauppa</h2>
+
+            <ul class="links-container">
+                <li class="link-item"><a href="./index.html" class="link">Takaisin etusivulle</a></li>
+            </ul>
+        </nav>
+    </header>
+    <form id="addProduct">
+        <div class="container">
+            <h3>Lisää uusi tuote</h3>
+
+            <p>Tuotteen nimi</p>
+            <input type="text" name="product_name" id="productName" placeholder="Tuotenimi" required></input>
+
+            <p>Tuotteen hinta (€)</p>
+            <input type="number" name="product_price" id="productPrice" placeholder="Tuotteen hinta (€)" min="0"
+                required></input>
+
+            <p>Tuotekuvaus</p>
+            <input type="text" name="product_description" id="productDescription" placeholder="Tuotekuvaus"
+                required></input>
+
+            <p>Tuotemäärä varastossa (max 10 kpl)</p>
+            <input type="number" name="product_inStock" id="productInStock" min="1" max="10"
+                placeholder="Tuotemäärä varastossa (max 10 kpl)" required></input>
+
+            <p>Valitse tuotteen kategoria</p>
+            <div class="dropdown">
+                <div class="dropdown-categories">
+                    <select name="product_category" id="productCategory" required>
+                        <option value="asusteet">asusteet</option>
+                        <option value="kengät">kengät</option>
+                        <option value="vaatteet">vaatteet</option>
+                        <option value="muut">muut</option>
+                    </select>
+                </div>
+            </div>
+
+            <br><button type="submit" id="createProduct">Lisää tuote</button>
+
+        </div>
+    </form>
+    <script>
+
+        // fetching an HTML element "addProduct". Adding an event listener in a submit action.
+        // When the HTML form is submitted the asyncronic function will fetch the formData from the HTML form
+        document.getElementById("addProduct").addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            // formElement is defined as a fetched document id "addProduct"
+            const formElement = document.getElementById("addProduct");
+            // formData is defined as a new FormData formElement
+            // converting formData to string
+            const formData = new FormData(formElement);
+
+            const data = {};
+            formData.forEach((value, key) => data[key] = value);
+            const dataAsJson = JSON.stringify(data);
+
+            console.log('Tämä on JSON:iksi muunnettu formData: ', dataAsJson);
+
+            // fetching formData with POST method from localhost/addProduct URL
+            const response = await fetch('http://localhost:3000/api/products/', {
+                method: 'POST',
+                body: dataAsJson,
+                mode: "cors",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            })
+
+                // promise method "then"
+                .then((response) => {
+                    console.log('Tämä on vastaus localhost:3000/addProduct-URL:sta: ', response);
+                    return response.json();
+                })
+                .then((data) => {
+                    console.log('Tämä on stringiksi muunnettu data localhost:3000/addProduct-URL:sta: ', data);
+                })
+                // error handling with "catch" method
+                .catch((error) => {
+                    console.error('Error', error);
+                })
+        });
+
+    </script>
+</body>
+
+</html>

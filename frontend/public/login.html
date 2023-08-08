@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <title>Verkkokauppa - sisäänkirjautuminen</title>
+</head>
+
+<body>
+    <header class="main-header">
+        <nav class="main-nav">
+            <h2>Verkkokauppa</h2>
+
+            <ul class="links-container">
+                <li class="link-item"><a href="./index.html" class="link">Takaisin etusivulle</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <form id="login">
+        <div class="container">
+            <h3>Kirjaudu sisään tehdäksesi tilaus</h3>
+            <h4>Syötä käyttäjätunnus ja salasana</h4>
+            <input type="text" name="user_name" id="username" placeholder="käyttäjätunnus" required></input>
+            <input type="password" name="user_password" id="password" placeholder="salasana" required></input>
+            <br><br><button type="submit" id="logUserIn">Kirjaudu</button>
+        </div>
+    </form>
+
+    <div class="container">
+        <br>
+        <h3>Eikö sinulla ole käyttäjätunnusta?</h3>
+        <li class="link-item"><a href="./signUp.html" class="link">Luo käyttäjätunnus</a></li>
+    </div>
+    <script>
+        document.getElementById("login").addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            // This function is supposed to check if the user's login is successful.
+            // If login succeed the user will continue to the payment view from the order confirmation
+            // page.
+            const loginData = document.getElementById("login");
+            const formData = new FormData(loginData);
+
+            const data = {};
+            formData.forEach((value, key) => data[key] = value);
+            const dataAsJson = JSON.stringify(data);
+
+            console.log('Tämä on JSON:iksi muunnettu formData: ' + dataAsJson);
+
+            const response = await fetch('http://localhost:3000/api/users/login', {
+                method: 'POST',
+                body: dataAsJson,
+                mode: "cors",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            })
+
+                // promise method "then"
+                .then((response) => {
+
+                    if (response.status === 200) {
+                        window.location.href = 'checkout.html';
+                    }
+
+                    console.log('Tämä on vastaus localhost:3000/login-URL:sta: ', response);
+                    return response.json();
+                })
+
+                // promise method "then"
+                .then((data) => {
+                    console.log('Tämä on stringiksi muunnettu data localhost:3000/login-URL:sta: ', data);
+                })
+
+                // error handling with "catch" method
+                .catch((error) => {
+                    console.error('Error', error);
+                    // res.status(500).json({ msg: error });
+                })
+        });
+
+    </script>
+</body>
+
+</html>

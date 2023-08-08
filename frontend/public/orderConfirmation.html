@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <title>Verkkokauppa - tilausvahvistus</title>
+</head>
+
+<body onload="showOrderItems()">
+    <header class="main-header">
+        <nav class="main-nav">
+            <h2>Verkkokauppa</h2>
+
+            <ul class="links-container">
+                <li class="link-item"><a href="./index.html" class="link">Takaisin etusivulle</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div id="showOrder">
+        <br>
+        <h3>Kiitos tilauksestasi!</h3>
+        <br>
+        <h4>Tilauksen sisältö</h4>
+        <br>
+
+    </div>
+
+    <div id="showOrderItemsSum">
+
+    </div>
+    <script>
+
+        function showOrderItems() {
+            let orderDiv = document.getElementById("showOrder");
+
+            const order = JSON.parse(localStorage.getItem("cart"));
+
+            let total = 0;
+
+            order.forEach(productInfo => {
+                console.log("This is the cart item product info: ", productInfo);
+
+                let orderItemContainer = document.createElement('div');
+                orderItemContainer.className = 'orderContainer';
+
+                let orderItemName = document.createElement('h4');
+                orderItemName.className = 'orderName';
+                orderItemName.innerHTML = productInfo.productInfo.product_name;
+
+                let orderItemDescription = document.createElement('p');
+                orderItemDescription.className = 'orderItemDescription';
+                orderItemDescription.innerHTML = productInfo.productInfo.product_description;
+
+                let orderItemPrice = document.createElement('h5');
+                orderItemPrice.className = 'orderItemPrice';
+                orderItemPrice.innerHTML = "yksikköhinta: " + productInfo.productInfo.product_price + " €";
+
+                let orderItemNumber = document.createElement('p');
+                orderItemNumber.className = 'orderItemNumber';
+                orderItemNumber.innerHTML = productInfo.productsInCart + " kpl";
+
+                let orderItemsDiv = document.getElementById("showOrderItemsSum");
+                orderItemsDiv.textContent = '';
+
+                total += productInfo.productInfo.product_price * productInfo.productsInCart;
+
+                let orderItemsSum = document.createElement('p');
+                orderItemsSum.className = 'orderItemsSum';
+                orderItemsSum.innerHTML = "Tilauksen kokonaissumma: " + total + " €";
+
+                orderItemContainer.appendChild(orderItemName);
+                orderItemContainer.appendChild(orderItemDescription);
+                orderItemContainer.appendChild(orderItemPrice);
+                orderItemContainer.appendChild(orderItemNumber);
+                orderItemContainer.appendChild(orderItemsSum);
+
+                orderDiv.appendChild(orderItemContainer);
+                orderItemsDiv.appendChild(orderItemsSum);
+            });
+        };
+
+        function goToLogin() {
+            window.location.href = "login.html";
+        };
+
+    </script>
+
+</body>
+
+</html>

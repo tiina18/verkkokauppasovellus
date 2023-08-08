@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <title>Verkkokauppa - tuotevalikoima</title>
+</head>
+
+<body onload="showItemsonPage()">
+  <header class="main-header">
+    <nav class="main-nav">
+      <h2>Verkkokauppa</h2>
+
+      <div id="searchItems">
+        <input id="search" type="text" class="searchInput" placeholder="hae tuotteita">
+        <i class="bi bi-search"></i>
+        <button class="search-btn" onclick="findItems()">etsi</button>
+      </div>
+
+    </nav>
+  </header>
+
+  <section class="content-section">
+    <div class="shop">
+
+      <div id="shopItems">
+
+      </div>
+
+      <div id="cart">
+        <div id="cartItems">
+
+        </div>
+
+        <div id="cartSum">
+
+        </div>
+
+        <button id="deleteCartItemsbtn" onclick="deleteCartItems()" hidden>Tyhjennä ostoskori</button>
+        <button id="placeOrderbtn" onclick="goToOrderConfirmation()" hidden>Mene kassalle</button>
+      </div>
+
+    </div>
+    </div>
+  </section>
+
+  <script>
+
+    // isFiltered function is defined as a false boolean as default
+    let isFiltered = false;
+
+    // Products are fetched with this asyncronic function from the application's 
+    // api/products path. Products are also converted to JSON format which is returned
+    // for application's usage.
+    async function fetchProducts() {
+      const products = await fetch('http://localhost:3000/api/products');
+      const dataAsJson = await products.json();
+
+      return dataAsJson;
+    };
+
+    // async function showItemsonPage is working as wanted.
+    // It shows all the Webshop database's products collection's items
+    // on the page "index.html" when the page is loaded (or reloaded)
+    async function showItemsonPage() {
+      let dataAsJson;
+      console.log(isFiltered);
+      if (!isFiltered) {
+        dataAsJson = await fetchProducts();
+      } else {
+        dataAsJson = await findItems();
+      }
+
+      let productDiv = document.getElementById('shopItems');
+
+      dataAsJson.products.forEach(product => {
+        let productContainer = document.createElement('div');
+        productContainer.className = 'productContainer';
+
+        let productImage = document.createElement('img');
+        productImage.setAttribute("src", "https://loremflickr.com/320/240");
+        productImage.className = 'productImage';
+
+        let productName = document.createElement('h4');
+        productName.className = 'productHeader';
+        productName.innerHTML = product.product_name;
+
+        let productPrice = document.createElement('h5');
+        productPrice.className = 'productPrice';
+        productPrice.innerHTML = "Hinta: " + new Intl.NumberFormat('fi-FI').format(product.product_price) + " €";
+
+        let productCategory = document.createElement('p');
+        productCategory.className = 'productCategory';
+        productCategory.innerHTML = "kategoria: " + product.product_category;
+
+        let productDescription = document.createElement('p');
+        productDescription.className = 'productDescription';
+        productDescription.innerHTML = "tuotekuvaus: " + product.product_description;
+
+        let productInStock = document.createElement('p');
+        productInStock.className = 'productInStock';
+        productInStock.innerHTML = "tuotteita varastossa: " + product.product_inStock + " kpl";
+
+        let productCounter = document.createElement('p');
+        productCounter.className = 'productCounter';
+        productCounter.innerText = 1;
+
+        // This function increases the item quantity in the product view where the product is going
+        // to be added to the cart array.
+        function increase() {
+          productCounter.innerText = parseInt(productCounter.innerText) + 1;
+
+          if (productCounter.innerText > product.product_inStock) {
+            productCounter.innerText = product.product_inStock;
+          }
+        };
+
+        // This function decreases the item quantity in the product view where the product is going
+        // to be added to the cart array.
+        function decrease() {
+          productCounter.innerText = parseInt(productCounter.innerText) - 1;
+
+          if (productCounter.innerText < 1) {
+            productCounter.innerText = 1;
+          }
+        };
+
+        // This function adds product to the cart array.
+        function addProductToCart() {
+          addToCart(product, parseInt(productCounter.innerText));
+        };
+
+        let productIncreaseButton = document.createElement('button');
+        productIncreaseButton.className = 'productIncreaseButton';
+        productIncreaseButton.innerText = "Lisää";
+        productIncreaseButton.addEventListener("click", increase);
+
+        let productDecreaseButton = document.createElement('button');
+        productDecreaseButton.className = 'productDecreaseButton';
+        productDecreaseButton.innerText = "Vähennä";
+        productDecreaseButton.addEventListener("click", decrease);
+
+        let addProductToCartButton = document.createElement('button');
+        addProductToCartButton.className = 'addProductToCartButton';
+        addProductToCartButton.innerText = "Lisää ostoskoriin";
+        addProductToCartButton.addEventListener("click", addProductToCart);
+
+        productContainer.appendChild(productImage);
+        productContainer.appendChild(productName);
+        productContainer.appendChild(productPrice);
+        productContainer.appendChild(productCategory);
+        productContainer.appendChild(productDescription);
+        productContainer.appendChild(productInStock);
+        productContainer.appendChild(productIncreaseButton);
+        productContainer.appendChild(productDecreaseButton);
+        productContainer.appendChild(productCounter);
+        productContainer.appendChild(addProductToCartButton);
+
+        productDiv.appendChild(productContainer);
+      });
+    };
+
+    // cart must have an own function because its functionalities are easier to use in the past code in that way
+    function fetchCart() {
+      // defining the cartStorage in the local storage
+      cartStorage = JSON.parse(localStorage.getItem('cart'));
+      // defining the cart array --> the cart is cartStorage a local storage array or an empty cart array
+      let cart = cartStorage || [];
+      // console.log(cart);
+
+      return cart;
+    };
+
+    // ADD TO CART
+    // This function adds products to the cart array.
+    function addToCart(productInfo, amount) {
+      const cart = fetchCart();
+      console.log("Tämä on tuotekohtainen määrä, joka lisätään ostoskoriin, muttei ole vielä ostoskorissa: ", amount);
+
+      // check if product already exist in cart
+      if (cart.some((item) => item.productInfo.product_name === productInfo.product_name)) {
+        alert("Tuote on jo ostoskorissa.");
+      } else {
+        console.log("Tämä on ostoskorin tuote: ", productInfo);
+
+        // the productInfo and the productsInCart amount are pushed to the cart array 
+        cart.push({
+          productInfo,
+          productsInCart: amount
+        });
+
+        console.log("Tämä on ostoskorin merkkijono: ", cart);
+      }
+
+      // the cart array is inserted in the local storage
+      localStorage.setItem("cart", JSON.stringify(cart));
+      showCartItems();
+    };
+
+    function deleteCartItem(productInfo) {
+      cartItemsStorage = fetchCart();
+      index = cartItemsStorage.findIndex(x => x.productInfo.product_name === productInfo.product_name);
+
+      if (index > -1) {
+        cartItemsStorage.splice(index, 1)
+      }
+
+      console.log('Tuotteen poiston jälkeen: ', cartItemsStorage);
+
+      if (cartItemsStorage.length === 0) {
+        document.getElementById("deleteCartItemsbtn").style.display = "none";
+        document.getElementById("placeOrderbtn").style.display = "none";
+        document.getElementById("cart").style.display = "none";
+
+        let cartSumDiv = document.getElementById('cartSum');
+        cartSumDiv.textContent = '';
+
+      } else {
+        document.getElementById("deleteCartItemsbtn").style.display = "block";
+        document.getElementById("placeOrderbtn").style.display = "block";
+        document.getElementById("cart").style.display = "flex";
+      }
+
+      localStorage.setItem("cart", JSON.stringify(cartItemsStorage));
+      showCartItems();
+    };
+
+    // This function increases the item quantity in the product view where the product is going
+    // to be added to the cart array.
+    function cartIncrease(productInfo) {
+      cartItemsStorage = fetchCart();
+      console.log(productInfo.product_name);
+      console.log(cartItemsStorage);
+
+      index = cartItemsStorage.findIndex(x => x.productInfo.product_name === productInfo.product_name);
+      console.log(index);
+
+      console.log(cartItemsStorage[index].productsInCart)
+      cartItemsStorage[index].productsInCart += 1;
+      console.log(cartItemsStorage[index].productsInCart)
+
+      //  let increasedAmount = cartProductAmount + 1;
+      //  cartItemCounter.innerText = increasedAmount;
+
+      if (cartItemsStorage[index].productsInCart > productInfo.product_inStock) {
+        cartItemsStorage[index].productsInCart = productInfo.product_inStock;
+      }
+
+      localStorage.setItem("cart", JSON.stringify(cartItemsStorage));
+      showCartItems();
+    };
+
+    // This function shows the products in the cart array which user adds in the cart. Cart items have the
+    // same properties than the shop items in the shop view.
+    // This function also counts the total sum for the cart items.
+    function showCartItems(product, productsInCart) {
+
+      const cart = fetchCart();
+      let cartDiv = document.getElementById('cartItems');
+      cartDiv.textContent = '';
+
+      let total = 0;
+
+      cart.forEach(product => {
+
+        let cartItemContainer = document.createElement('div');
+        cartItemContainer.className = 'cartItemContainer';
+
+        let cartItemName = document.createElement('h4');
+        cartItemName.className = 'cartItemInfo';
+        cartItemName.innerHTML = product.productInfo.product_name;
+
+        let cartItemAmount = document.createElement('p');
+        cartItemAmount.className = 'cartItemAmount';
+        cartItemAmount.innerText = "Määrä: " + product.productsInCart + " kpl";
+
+        let cartItemPrice = document.createElement('h5');
+        cartItemPrice.className = 'cartItemPrice';
+        cartItemPrice.innerHTML = "Tuotteen yksikköhinta: " + product.productInfo.product_price + " €";
+
+        // This function decreases the item quantity in the product view where the product is going
+        // to be added to the cart array.
+        function cartDecrease(productInfo) {
+          cartItemsStorage = fetchCart();
+
+          console.log(productInfo.product_name);
+          console.log(cartItemsStorage);
+
+          // const cartProductAmount = productInfo.productsInCart;
+
+          index = cartItemsStorage.findIndex(x => x.productInfo.product_name === productInfo.product_name);
+
+          console.log(index);
+
+          console.log(cartItemsStorage[index].productsInCart)
+
+          cartItemsStorage[index].productsInCart -= 1;
+
+          console.log(cartItemsStorage[index].productsInCart)
+
+          //  let increasedAmount = cartProductAmount + 1;
+          //  cartItemCounter.innerText = increasedAmount;
+
+          if (cartItemsStorage[index].productsInCart < 1) {
+            cartItemsStorage[index].productsInCart = 1;
+          }
+
+          localStorage.setItem("cart", JSON.stringify(cartItemsStorage));
+          showCartItems();
+        };
+
+        let cartItemDeleteButton = document.createElement('button');
+        cartItemDeleteButton.className = 'cartItemDeleteButton';
+        cartItemDeleteButton.innerText = "Poista tuote";
+        cartItemDeleteButton.addEventListener("click", () => deleteCartItem(product.productInfo));
+
+        let cartItemIncreaseButton = document.createElement('button');
+        cartItemIncreaseButton.className = 'cartItemIncreaseButton';
+        cartItemIncreaseButton.innerText = "Lisää";
+        cartItemIncreaseButton.addEventListener("click", () => cartIncrease(product.productInfo));
+
+        let cartItemDecreaseButton = document.createElement('button');
+        cartItemDecreaseButton.className = 'cartItemDecreaseButton';
+        cartItemDecreaseButton.innerText = "Vähennä";
+        cartItemDecreaseButton.addEventListener("click", () => cartDecrease(product.productInfo));
+
+        cartItemContainer.appendChild(cartItemName);
+        cartItemContainer.appendChild(cartItemAmount);
+        cartItemContainer.appendChild(cartItemPrice);
+        cartItemContainer.appendChild(cartItemIncreaseButton);
+        cartItemContainer.appendChild(cartItemDecreaseButton);
+        cartItemContainer.appendChild(cartItemDeleteButton);
+
+        cartDiv.appendChild(cartItemContainer);
+
+        let cartSumDiv = document.getElementById('cartSum');
+        cartSumDiv.textContent = '';
+
+        total += product.productInfo.product_price * product.productsInCart;
+
+        let cartTotalContainer = document.createElement('div');
+        cartTotalContainer.className = 'cartTotalContainer';
+
+        let cartTotalSum = document.createElement('p');
+        cartTotalSum.className = 'cartTotalSum';
+        cartTotalSum.innerHTML = "Ostoskorissa olevien tuotteiden kokonaissumma: " + total + " €";
+
+        cartTotalContainer.appendChild(cartTotalSum);
+        cartSumDiv.appendChild(cartTotalContainer);
+
+        // console.log("Tämä on ostoskorin loppusumma: ", total);
+        console.log('Ostoskori: ', cart);
+
+        if (cart === "[]") {
+
+          document.getElementById("deleteCartItemsbtn").style.display = "none";
+          document.getElementById("placeOrderbtn").style.display = "none";
+          document.getElementById("cartSum").style.display = "none";
+          document.getElementById("cartItems").style.display = "none";
+          document.getElementById("cart").style.display = "none";
+
+        } else {
+          document.getElementById("deleteCartItemsbtn").style.display = "block";
+          document.getElementById("placeOrderbtn").style.display = "block";
+          document.getElementById("cart").style.display = "flex";
+        }
+
+      });
+    };
+
+    showCartItems();
+
+    // Go to order confirmation page. I need to fix that issue that the user can continue to order confirmation page
+    // if the cart is still empty. That needs to get limited.
+    function goToOrderConfirmation() {
+
+      // if the cart array is empty there is an alert and if the cart array has
+      // items in it, user is directed to the order confirmation page
+      if (localStorage.getItem("cart") === '[]') {
+        alert("Ostoskorisi on tyhjä")
+      } else {
+        // console.log('Tallennettu');
+        window.location.href = 'login.html';
+      }
+    };
+
+    // Find items using the search bar in product view.
+    // Find items property works as wanted
+    async function findItems() {
+
+      // isFiltered boolean is true
+      isFiltered = true;
+
+      // searchItem is defined as the search-input value
+      let searchItem = document.getElementById('search').value;
+      // toLowerCase is needed because of capital letters do not affect
+      searchItem = searchItem.toLowerCase();
+
+      console.log(searchItem);
+
+      let x = document.getElementsByClassName('productContainer');
+
+      // for-loop which shows the product if it matches with searchItem input 
+      for (i = 0; i < x.length; i++) {
+        if (!x[i].innerHTML.toLowerCase().includes(searchItem)) {
+          x[i].style.display = "none"
+        } else {
+          x[i].style.display = "block"
+        }
+      }
+    };
+
+    // This function deletes all the items in the cart array
+    function deleteCartItems() {
+      localStorage.setItem("cart", '[]');
+
+      // the cart array is set to an empty array
+      cart = [];
+      // the cartDiv's textContent property is set to an empty string
+      let cartDiv = document.getElementById('cartItems');
+      cartDiv.textContent = '';
+
+      // the cartSumDiv's textContent property is set to an empty string
+      let cartSumDiv = document.getElementById('cartSum');
+      cartSumDiv.textContent = '';
+
+      document.getElementById("deleteCartItemsbtn").style.display = "none";
+      document.getElementById("placeOrderbtn").style.display = "none";
+      document.getElementById("cart").style.display = "none";
+
+      showCartItems();
+    };
+
+  </script>
+</body>
+
+</html>
